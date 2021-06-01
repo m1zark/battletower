@@ -93,15 +93,13 @@ public class Config {
             settings.getNode("misc","cost-per-chance").getInt(500);
             settings.getNode("misc","npc-attendant-name").getString("BattleTower Attendant");
 
-            settings.getNode("battles","rules","enhanced-pokemon").setComment("252 in every EV stat").getBoolean(true);
+            settings.getNode("battles","rules","enhanced-pokemon").setComment("252 in every EV stat").getBoolean(false);
             settings.getNode("battles","rules","number-pokemon").getInt(3);
-
             settings.getNode("battles","rules","team-selection-time").getInt(120);
             settings.getNode("battles","rules","turn-time").getInt(120);
             settings.getNode("battles","rules","number-of-trainer-pokemon").getInt(6);
             settings.getNode("battles","rules","full-heal").getBoolean(true);
             settings.getNode("battles","rules","raise-to-level-cap").getBoolean(true);
-
             settings.getNode("battles","rules","boss-trainer-streak").getInt(5);
             settings.getNode("battles","rules","show-teams").getBoolean(true);
             settings.getNode("battles","rules","level-cap").getInt(50);
@@ -184,7 +182,6 @@ public class Config {
 
         return info.split(":");
     }
-
 
     public static Vector3d getEntranceLocation() {
         try {

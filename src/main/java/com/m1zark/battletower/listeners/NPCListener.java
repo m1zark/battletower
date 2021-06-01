@@ -57,10 +57,7 @@ public class NPCListener {
     private ArrayList<Dialogue> forgeDialogue(Player player, String name) {
         ArrayList<Dialogue> prompt = Lists.newArrayList();
         for(String text : MessageConfig.npcWelcome) {
-            prompt.add(Dialogue.builder()
-                    .setName(name)
-                    .setText(text.replace("{player}",player.getName()))
-                    .build()
+            prompt.add(Dialogue.builder().setName(name).setText(text.replace("{player}",player.getName())).build()
             );
         }
 
@@ -83,9 +80,7 @@ public class NPCListener {
                         .addChoice(
                                 Choice.builder()
                                         .setText(MessageConfig.npcInteractNo)
-                                        .setHandle(e -> {
-                                            e.setAction(DialogueNextAction.DialogueGuiAction.CLOSE);
-                                        })
+                                        .setHandle(e -> e.setAction(DialogueNextAction.DialogueGuiAction.CLOSE))
                                         .build()
                         )
                         .build()
@@ -129,6 +124,12 @@ public class NPCListener {
         }
 
         return true;
+    }
+
+    private boolean checkUses(Player p) {
+
+
+        return false;
     }
 
     private void start(Player p) {

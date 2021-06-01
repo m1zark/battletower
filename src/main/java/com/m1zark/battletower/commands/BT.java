@@ -47,7 +47,7 @@ public class BT implements CommandExecutor {
         Chat.sendMessage(src, "&7Boss Battles: &bEvery " + Utils.ordinal(Config.bossStreak) + " battle");
         Chat.sendMessage(src, "&7Banned Pok\u00E9mon: &b" + StringUtils.join(Config.pokemon,", "));
         Chat.sendMessage(src, "&7Banned Moves: &b" + StringUtils.join(Config.moves,", "));
-        Chat.sendMessage(src, "&7Banned Abilities: &bWonderGuard, Serene Grace + any flinching move");
+        Chat.sendMessage(src, "&7Banned Abilities: &b" + StringUtils.join(Config.abilities,", "));
         return CommandResult.success();
     }
 

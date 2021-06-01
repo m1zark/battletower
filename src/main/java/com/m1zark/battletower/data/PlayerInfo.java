@@ -12,4 +12,5 @@ public class PlayerInfo {
     private final int totalWins;
     private final int winStreak;
     private final int bpTotal;
+    private final int tries;
 }
