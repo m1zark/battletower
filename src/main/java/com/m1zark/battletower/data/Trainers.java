@@ -8,20 +8,19 @@ import com.pixelmonmod.pixelmon.Pixelmon;
 import com.pixelmonmod.pixelmon.api.exceptions.ShowdownImportException;
 import com.pixelmonmod.pixelmon.api.pokemon.ImportExportConverter;
 import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
+import com.pixelmonmod.pixelmon.battles.BattleRegistry;
+import com.pixelmonmod.pixelmon.battles.controller.participants.BattleParticipant;
 import com.pixelmonmod.pixelmon.battles.controller.participants.PlayerParticipant;
 import com.pixelmonmod.pixelmon.battles.controller.participants.TrainerParticipant;
 import com.pixelmonmod.pixelmon.battles.rules.BattleRules;
 import com.pixelmonmod.pixelmon.battles.rules.clauses.BattleClause;
 import com.pixelmonmod.pixelmon.battles.rules.clauses.BattleClauseRegistry;
-import com.pixelmonmod.pixelmon.battles.rules.teamselection.TeamSelectPokemon;
-import com.pixelmonmod.pixelmon.battles.rules.teamselection.TeamSelection;
 import com.pixelmonmod.pixelmon.battles.rules.teamselection.TeamSelectionList;
 import com.pixelmonmod.pixelmon.comm.packetHandlers.ClearTrainerPokemon;
 import com.pixelmonmod.pixelmon.comm.packetHandlers.npc.StoreTrainerPokemon;
 import com.pixelmonmod.pixelmon.entities.npcs.EntityNPC;
 import com.pixelmonmod.pixelmon.entities.npcs.NPCTrainer;
 import com.pixelmonmod.pixelmon.entities.npcs.registry.NPCRegistryTrainers;
-import com.pixelmonmod.pixelmon.entities.pixelmon.EntityPixelmon;
 import com.pixelmonmod.pixelmon.enums.EnumEncounterMode;
 import com.pixelmonmod.pixelmon.enums.EnumGrowth;
 import com.pixelmonmod.pixelmon.enums.EnumSpecies;
@@ -47,14 +46,14 @@ public class Trainers {
         isBoss = boss;
 
         EntityPlayerMP user = (EntityPlayerMP) p;
+
         NPCTrainer trainer = new NPCTrainer(user.world);
         trainer.init(NPCRegistryTrainers.Steve);
-
         String[] custom = Config.trainerInfo("custom-info");
         trainer.getEntityData().setString("BattleTower", p.getUniqueId().toString());
         trainer.setName(Config.trainer_prefix + custom[0]);
         trainer.setCustomSteveTexture(custom[1]);
-        trainer.setTextureIndex(Integer.valueOf(custom[2]));
+        trainer.setTextureIndex(Integer.parseInt(custom[2]));
 
         trainer.setAlwaysRenderNameTag(true);
         trainer.setBattleAIMode(EnumBattleAIMode.Advanced);
@@ -70,7 +69,7 @@ public class Trainers {
 
         trainer.getPokemonStorage().set(0, null);
 
-        int trainerPokemon = Config.trainerPokemon > 6 ? 6 : Config.trainerPokemon < 1 ? 1 : Config.trainerPokemon;
+        int trainerPokemon = Config.trainerPokemon > 6 ? 6 : Math.max(Config.trainerPokemon, 1);
         ArrayList<Pokemon> pokemonList = generateRandomPool(trainerPokemon);
         pokemonList.forEach(pokemon -> trainer.getPokemonStorage().add(pokemon));
 
@@ -140,7 +139,7 @@ public class Trainers {
         rules.raiseToCap = Config.raiseToCap;
         rules.fullHeal = Config.fullHeal;
 
-        BattleClauseRegistry clauseRegistry = BattleClauseRegistry.getClauseRegistry();
+        BattleClauseRegistry<BattleClause> clauseRegistry = BattleClauseRegistry.getClauseRegistry();
         List<BattleClause> newClauses = rules.getClauseList();
 
         Config.clauses.forEach(clause -> {

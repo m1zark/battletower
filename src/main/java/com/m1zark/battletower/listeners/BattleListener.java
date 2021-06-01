@@ -17,6 +17,7 @@ import com.pixelmonmod.pixelmon.battles.BattleRegistry;
 import com.pixelmonmod.pixelmon.battles.controller.BattleControllerBase;
 import com.pixelmonmod.pixelmon.battles.controller.participants.BattleParticipant;
 import com.pixelmonmod.pixelmon.battles.controller.participants.PlayerParticipant;
+import com.pixelmonmod.pixelmon.battles.controller.participants.TrainerParticipant;
 import com.pixelmonmod.pixelmon.comm.packetHandlers.battles.ExitBattle;
 import com.pixelmonmod.pixelmon.comm.packetHandlers.dialogue.DialogueNextAction;
 import com.pixelmonmod.pixelmon.entities.npcs.NPCTrainer;
