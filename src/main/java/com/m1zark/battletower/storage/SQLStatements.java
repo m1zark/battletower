@@ -114,7 +114,7 @@ public abstract class SQLStatements {
             try(Connection connection = DataSource.getConnection()) {
                 try(ResultSet results = connection.prepareStatement("SELECT * FROM `" + this.mainTable + "`").executeQuery()) {
                     while(results.next()) {
-                        players.add(new PlayerInfo(UUID.fromString(results.getString("PlayerUUID")),results.getInt("TotalWins"),results.getInt("WinStreak"),results.getInt("BP_Balance")));
+                        players.add(new PlayerInfo(UUID.fromString(results.getString("PlayerUUID")),results.getInt("TotalWins"),results.getInt("WinStreak"),results.getInt("BP_Balance"), 0));
                     }
                 }
 
