@@ -10,6 +10,7 @@ import com.m1zark.battletower.data.PlayerInfo;
 import com.m1zark.battletower.data.Trainers;
 import com.m1zark.battletower.utils.Utils;
 import com.m1zark.m1utilities.api.Chat;
+import com.m1zark.m1utilities.api.Money;
 import com.pixelmonmod.pixelmon.api.dialogue.Choice;
 import com.pixelmonmod.pixelmon.api.dialogue.Dialogue;
 import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
@@ -73,7 +74,7 @@ public class NPCListener {
                                         .setText(MessageConfig.npcInteractYes)
                                         .setHandle(e -> {
                                                 e.setAction(DialogueNextAction.DialogueGuiAction.CLOSE);
-                                                if(checkTeam(player)) start(player);
+                                                if(checkTeam(player) && checkCanBattle(player, pl.get())) start(player);
                                         })
                                         .build()
                         )
@@ -126,9 +127,18 @@ public class NPCListener {
         return true;
     }
 
-    private boolean checkUses(Player p) {
+    private boolean checkCanBattle(Player p, PlayerInfo pl) {
+        if(pl.getTries() <= Config.chances) {
+            if (Money.canPay(p, Config.cost)) {
+                Money.withdrawn(p, Config.cost);
+                return true;
+            } else {
+                Chat.sendMessage(p, MessageConfig.npcCost.replace("{cost}", String.valueOf(Config.cost)));
+                return false;
+            }
+        }
 
-
+        Chat.sendMessage(p, MessageConfig.npcAttempts.replace("{attempts}", String.valueOf(Config.chances)));
         return false;
     }
 
