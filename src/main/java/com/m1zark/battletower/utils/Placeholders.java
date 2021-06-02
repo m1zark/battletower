@@ -27,19 +27,19 @@ public class Placeholders {
 
     @Placeholder(id="bt_bp_total")
     public String bpTotal(@Source Player player) {
-        Optional<PlayerInfo> stats = BattleTower.getInstance().getSql().getPlayerData().stream().filter(id -> id.getPlayer().equals(player.getUniqueId())).findFirst();
-        return stats.map(playerInfo -> String.valueOf(playerInfo.getBpTotal())).orElse("");
+        PlayerInfo stats = BattleTower.getInstance().getSql().getPlayerData(player.getUniqueId());
+        return String.valueOf(stats.getBpTotal());
     }
 
     @Placeholder(id="bt_win_streak")
     public String winStreak(@Source Player player) {
-        Optional<PlayerInfo> stats = BattleTower.getInstance().getSql().getPlayerData().stream().filter(id -> id.getPlayer().equals(player.getUniqueId())).findFirst();
-        return stats.map(playerInfo -> String.valueOf(playerInfo.getWinStreak())).orElse("");
+        PlayerInfo stats = BattleTower.getInstance().getSql().getPlayerData(player.getUniqueId());
+        return String.valueOf(stats.getWinStreak());
     }
 
     @Placeholder(id="bt_total_wins")
     public String totalWins(@Source Player player) {
-        Optional<PlayerInfo> stats = BattleTower.getInstance().getSql().getPlayerData().stream().filter(id -> id.getPlayer().equals(player.getUniqueId())).findFirst();
-        return stats.map(playerInfo -> String.valueOf(playerInfo.getTotalWins())).orElse("");
+        PlayerInfo stats = BattleTower.getInstance().getSql().getPlayerData(player.getUniqueId());
+        return String.valueOf(stats.getTotalWins());
     }
 }

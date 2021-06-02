@@ -62,8 +62,8 @@ public class NPCListener {
             );
         }
 
-        Optional<PlayerInfo> pl = BattleTower.getInstance().getSql().getPlayerData().stream().filter(id -> id.getPlayer().equals(player.getUniqueId())).findFirst();
-        if(pl.get().getWinStreak() > 0) prompt.add(Dialogue.builder().setName(name).setText(MessageConfig.npcHasStreak.replace("{streak}",String.valueOf(pl.get().getWinStreak()))).build());
+        PlayerInfo pl = BattleTower.getInstance().getSql().getPlayerData(player.getUniqueId());
+        if(pl.getWinStreak() > 0) prompt.add(Dialogue.builder().setName(name).setText(MessageConfig.npcHasStreak.replace("{streak}",String.valueOf(pl.getWinStreak()))).build());
 
         prompt.add(
                 Dialogue.builder()
@@ -74,7 +74,8 @@ public class NPCListener {
                                         .setText(MessageConfig.npcInteractYes)
                                         .setHandle(e -> {
                                                 e.setAction(DialogueNextAction.DialogueGuiAction.CLOSE);
-                                                if(checkTeam(player) && checkCanBattle(player, pl.get())) start(player);
+
+                                                if(checkTeam(player) && checkCanBattle(player, pl)) start(player);
                                         })
                                         .build()
                         )
@@ -128,7 +129,7 @@ public class NPCListener {
     }
 
     private boolean checkCanBattle(Player p, PlayerInfo pl) {
-        if(pl.getTries() <= Config.chances) {
+        if(pl.getAttempts() <= Config.chances) {
             if (Money.canPay(p, Config.cost)) {
                 Money.withdrawn(p, Config.cost);
                 return true;
@@ -151,7 +152,7 @@ public class NPCListener {
             if(arena.get().getPlayerSpawn() == null || arena.get().getTrainerSpawn() == null) {
                 Chat.sendMessage(p, "&cThere doesn't seem to be spawn locations set for " + arena.get().getId() + ". Contact an admin and let them know.");
             } else {
-                Optional<PlayerInfo> pl = BattleTower.getInstance().getSql().getPlayerData().stream().filter(id -> id.getPlayer().equals(p.getUniqueId())).findFirst();
+                PlayerInfo pl = BattleTower.getInstance().getSql().getPlayerData(p.getUniqueId());
 
                 arena.get().setInUse(true);
                 BattleTower.getInstance().getSql().updateArena(arena.get());
@@ -160,7 +161,7 @@ public class NPCListener {
                 Utils.teleportPlayer(p, arena.get().getPlayerSpawn(), arena.get().getPlayerRotation());
                 Chat.sendMessage(p, MessageConfig.getMessages("messages.battles.teleporting-to-arena").replace("{arena}", arena.get().getId()));
 
-                NPCTrainer trainer = Trainers.getTrainer(p, pl.get().getWinStreak() % Config.bossStreak == 0 && pl.get().getWinStreak() != 0);
+                NPCTrainer trainer = Trainers.getTrainer(p, pl.getWinStreak() % Config.bossStreak == 0 && pl.getWinStreak() != 0);
                 Trainers.spawnTrainer(trainer, p);
 
                 Sponge.getScheduler().createTaskBuilder().execute(() -> {

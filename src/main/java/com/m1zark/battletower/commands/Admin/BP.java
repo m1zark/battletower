@@ -2,6 +2,7 @@ package com.m1zark.battletower.commands.Admin;
 
 import com.m1zark.battletower.BTInfo;
 import com.m1zark.battletower.BattleTower;
+import com.m1zark.battletower.data.PlayerInfo;
 import com.m1zark.m1utilities.api.Chat;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -18,7 +19,9 @@ public class BP implements CommandExecutor {
         Optional<Player> player = args.getOne("player");
         int quantity = args.getOne("quantity").isPresent() ? args.<Integer>getOne("quantity").get() : 1;
 
-        BattleTower.getInstance().getSql().updateBPTotal(player.get().getUniqueId(), false, quantity);
+        PlayerInfo pl = BattleTower.getInstance().getSql().getPlayerData(player.get().getUniqueId());
+        pl.setBpTotal(quantity,false);
+        BattleTower.getInstance().getSql().updatePlayerData(player.get().getUniqueId(), pl);
 
         if(src instanceof Player) {
             Chat.sendMessage(src, "&7Successfully gave &b" + player.get().getName() + " &d" + quantity + " &7BP!");

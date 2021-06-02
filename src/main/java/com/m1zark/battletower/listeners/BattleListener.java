@@ -41,20 +41,21 @@ public class BattleListener {
         if(event.trainer.getEntityData().hasKey("BattleTower")) {
             event.trainer.setDead();
 
-            BattleTower.getInstance().getSql().updateTotalWins(p.getUniqueId());
-            BattleTower.getInstance().getSql().updateWinStreak(p.getUniqueId(), false);
-
-            Optional<PlayerInfo> pl = BattleTower.getInstance().getSql().getPlayerData().stream().filter(id -> id.getPlayer().equals(p.getUniqueId())).findFirst();
+            PlayerInfo pl = BattleTower.getInstance().getSql().getPlayerData(p.getUniqueId());
 
             int bp = Config.battlepoints;
             if(Config.allowMultiplier) {
-                if(between(pl.get().getWinStreak(),10,20)) bp = bp + 1;
-                else if(between(pl.get().getWinStreak(),20,30)) bp = bp + 2;
-                else if(between(pl.get().getWinStreak(),30,40)) bp = bp + 3;
-                else if(between(pl.get().getWinStreak(),40,50) || pl.get().getWinStreak() >= 51) bp = bp + 4;
+                if(between(pl.getWinStreak(),10,20)) bp = bp + 1;
+                else if(between(pl.getWinStreak(),20,30)) bp = bp + 2;
+                else if(between(pl.getWinStreak(),30,40)) bp = bp + 3;
+                else if(between(pl.getWinStreak(),40,50) || pl.getWinStreak() >= 51) bp = bp + 4;
             }
 
-            BattleTower.getInstance().getSql().updateBPTotal(p.getUniqueId(), false, bp);
+            pl.setTotalWins();
+            pl.setWinStreak(false);
+            pl.setBpTotal(bp, false);
+
+            BattleTower.getInstance().getSql().updatePlayerData(p.getUniqueId(), pl);
 
             ArrayList<Dialogue> dialogues = new ArrayList<>();
             dialogues.add(Dialogue.builder().setName(event.trainer.getName()).setText(MessageConfig.getMessages("messages.battles.npc.on-trainer-win").replace("{amount}",String.valueOf(bp))).build());
@@ -65,14 +66,14 @@ public class BattleListener {
                     .addChoice(Choice.builder()
                             .setText(MessageConfig.trainerDialogue().get(0))
                             .setHandle(e -> {
-                                if (pl.get().getWinStreak() % Config.bossStreak == 0) {
-                                    e.reply(Dialogue.builder().setName(event.trainer.getName()).setText(MessageConfig.getMessages("messages.battle.npc.boss-trainer").replace("{streak}", Utils.ordinal(pl.get().getWinStreak()))).build());
+                                if (pl.getWinStreak() % Config.bossStreak == 0) {
+                                    e.reply(Dialogue.builder().setName(event.trainer.getName()).setText(MessageConfig.getMessages("messages.battle.npc.boss-trainer").replace("{streak}", Utils.ordinal(pl.getWinStreak()))).build());
                                 } else {
                                     e.reply(Dialogue.builder().setName(event.trainer.getName()).setText(MessageConfig.trainerDialogue().get(1)).build());
                                 }
 
                                 if(e.getAction().equals(DialogueNextAction.DialogueGuiAction.CLOSE)) {
-                                    startBattle(p, pl.get().getWinStreak());
+                                    startBattle(p, pl.getWinStreak());
                                 }
                             })
                             .build())
@@ -82,7 +83,7 @@ public class BattleListener {
                                 e.reply(Dialogue.builder().setName(event.trainer.getName()).setText(MessageConfig.trainerDialogue().get(3)).build());
 
                                 Sponge.getScheduler().createTaskBuilder().execute(() -> {
-                                    this.endBattle(event.player);
+                                    this.endBattle(event.player, pl);
                                 }).delay(2, TimeUnit.SECONDS).submit(BattleTower.getInstance());
                             })
                             .build())
@@ -95,16 +96,18 @@ public class BattleListener {
     @SubscribeEvent
     public void onTrainerWon(LostToTrainerEvent event) {
         if(event.trainer.getEntityData().hasKey("BattleTower")) {
-            event.trainer.setDead();
+            Player p = (Player) event.player;
+            PlayerInfo pl = BattleTower.getInstance().getSql().getPlayerData(p.getUniqueId());
 
-            BattleTower.getInstance().getSql().updateWinStreak(((Player)event.player).getUniqueId(), true);
+            event.trainer.setDead();
+            pl.setWinStreak(true);
 
             ArrayList<Dialogue> dialogues = new ArrayList<>();
             dialogues.add(Dialogue.builder().setName(event.trainer.getName()).setText(MessageConfig.getMessages("messages.battles.npc.on-trainer-defeat")).build());
             Dialogue.setPlayerDialogueData(event.player, dialogues, true);
 
             Sponge.getScheduler().createTaskBuilder().execute(() -> {
-                this.endBattle(event.player);
+                this.endBattle(event.player, pl);
             }).delay(2, TimeUnit.SECONDS).submit(BattleTower.getInstance());
         }
     }
@@ -143,7 +146,7 @@ public class BattleListener {
         ).delay(2, TimeUnit.SECONDS).submit(BattleTower.getInstance());
     }
 
-    private void endBattle(EntityPlayerMP player) {
+    private void endBattle(EntityPlayerMP player, PlayerInfo pl) {
         BattleControllerBase bc = BattleRegistry.getBattle(player);
         if (bc != null) {
             bc.endBattleWithoutXP();
@@ -151,6 +154,8 @@ public class BattleListener {
         } else {
             Pixelmon.network.sendTo(new ExitBattle(), player);
         }
+
+        BattleTower.getInstance().getSql().updatePlayerData(player.getUniqueID(), pl);
 
         Arenas arena = BattleTower.getInstance().battleArenas.get(player.getUniqueID());
         arena.setInUse(false);

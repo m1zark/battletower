@@ -22,7 +22,7 @@ public class Leaderboard implements CommandExecutor {
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
         if (!(src instanceof Player)) throw new CommandException(Text.of(TextColors.RED,"You must be logged onto the server to run this command."));
 
-        List<PlayerInfo> players = BattleTower.getInstance().getSql().getPlayerData();
+        List<PlayerInfo> players = BattleTower.getInstance().getSql().getAllPlayerData();
 
         Optional<String> type = args.getOne(Text.of("type"));
 
@@ -33,9 +33,6 @@ public class Leaderboard implements CommandExecutor {
                     break;
                 case "streak":
                     players.sort(Comparator.comparing(PlayerInfo::getWinStreak).reversed());
-                    break;
-                default:
-                    players.sort(Comparator.comparing(PlayerInfo::getTotalWins).reversed());
                     break;
             }
 

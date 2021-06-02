@@ -19,10 +19,10 @@ import java.util.Optional;
 
 public class VendorUI extends InventoryManager {
     private Player player;
+    private PlayerInfo pl;
     private int page = 1;
     private int maxPage;
     private String vendor;
-    private int balance;
 
     public VendorUI(Player p, int page, String vendor) {
         super(p, 6, Text.of(Chat.embedColours("&4&lBT Market &7\u00BB " + InventoryConfig.getVendorInfo(vendor,"display-name"))));
@@ -30,8 +30,7 @@ public class VendorUI extends InventoryManager {
         this.page = page;
         this.vendor = vendor;
 
-        Optional<PlayerInfo> pl = BattleTower.getInstance().getSql().getPlayerData().stream().filter(id -> id.getPlayer().equals(p.getUniqueId())).findFirst();
-        this.balance = pl.get().getBpTotal();
+        this.pl = BattleTower.getInstance().getSql().getPlayerData(p.getUniqueId());
 
         int size = InventoryConfig.getItemList(this.vendor).size();
         this.maxPage = size % 36 == 0 && size / 36 != 0 ? size / 36 : size / 36 + 1;
@@ -125,20 +124,22 @@ public class VendorUI extends InventoryManager {
 
                     itemData.ifPresent(data -> {
                         Sponge.getScheduler().createTaskBuilder().execute(() -> {
-                            if (this.balance - data.getCost() >= 0) {
+                            if (this.pl.getBpTotal() - data.getCost() >= 0) {
                                 if(data.getType().equalsIgnoreCase("item")) {
                                     if(Inventories.giveItem(this.player, data.parseItem(), data.getCount())) {
-                                        BattleTower.getInstance().getSql().updateBPTotal(this.player.getUniqueId(), true, data.getCost());
+                                        pl.setBpTotal(data.getCost(), true);
                                         Chat.sendMessage(this.player, MessageConfig.getMessages("messages.market.purchase-item").replace("{item}",data.getName()).replace("{cost}", String.valueOf(data.getCost())));
                                     } else {
                                         Chat.sendMessage(this.player, MessageConfig.getMessages("messages.market.inventory-full").replace("{item}",data.getName()));
                                     }
                                 } else if(data.getType().equalsIgnoreCase("command")) {
-                                    BattleTower.getInstance().getSql().updateBPTotal(this.player.getUniqueId(), true, data.getCost());
+                                    pl.setBpTotal(data.getCost(), true);
                                     Sponge.getCommandManager().process(Sponge.getServer().getConsole(), data.cmdParser(this.player));
 
                                     Chat.sendMessage(this.player, MessageConfig.getMessages("messages.market.purchase-item").replace("{item}",data.getName()).replace("{cost}", String.valueOf(data.getCost())));
                                 }
+
+                                BattleTower.getInstance().getSql().updatePlayerData(player.getUniqueId(), pl);
 
                                 this.clearIcons(49);
                                 this.addIcon(SharedIcons.infoIcon(49, this.player));

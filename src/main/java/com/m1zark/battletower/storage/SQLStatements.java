@@ -26,7 +26,7 @@ public abstract class SQLStatements {
     public void createTables() {
         try {
             try(Connection connection = DataSource.getConnection()) {
-                try(PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS `" + this.mainTable + "` (ID INTEGER NOT NULL AUTO_INCREMENT, PlayerUUID CHAR(36), TotalWins Integer, WinStreak Integer, BP_Balance Integer, PRIMARY KEY(ID));")) {
+                try(PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS `" + this.mainTable + "` (ID INTEGER NOT NULL AUTO_INCREMENT, PlayerUUID CHAR(36), Data LONGTEXT, PRIMARY KEY(ID));")) {
                     statement.executeUpdate();
                 }
                 try(PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS `" + this.arenaTable + "` (ID INTEGER NOT NULL AUTO_INCREMENT, Name CHAR(36), Arena LONGTEXT, PRIMARY KEY(ID));")) {
@@ -45,11 +45,9 @@ public abstract class SQLStatements {
             try(Connection connection = DataSource.getConnection()) {
                 try(ResultSet results = connection.prepareStatement("SELECT * FROM `" + this.mainTable + "` WHERE playerUUID = '" + uuid + "'").executeQuery()) {
                     if(!results.next()) {
-                        try(PreparedStatement statement = connection.prepareStatement("INSERT INTO `" + this.mainTable + "` (PlayerUUID, TotalWins, WinStreak, BP_Balance) VALUES (?, ?, ?, ?)")) {
+                        try(PreparedStatement statement = connection.prepareStatement("INSERT INTO `" + this.mainTable + "` (PlayerUUID, Data) VALUES (?, ?)")) {
                             statement.setString(1, uuid.toString());
-                            statement.setInt(2, 0);
-                            statement.setInt(3, 0);
-                            statement.setInt(4, 0);
+                            statement.setString(2, gson.toJson(new PlayerInfo(uuid,0,0,0,0)));
                             statement.executeUpdate();
                         }
                     }
@@ -60,10 +58,10 @@ public abstract class SQLStatements {
         }
     }
 
-    public void updateTotalWins(UUID uuid) {
+    public void updatePlayerData(UUID uuid, PlayerInfo info) {
         try {
             try(Connection connection = DataSource.getConnection()) {
-                try(PreparedStatement updatePlayer = connection.prepareStatement("UPDATE `" + this.mainTable + "` SET TotalWins = TotalWins + 1 WHERE PlayerUUID = '" + uuid + "'")) {
+                try(PreparedStatement updatePlayer = connection.prepareStatement("UPDATE `" + this.mainTable + "` SET Data = '" + gson.toJson(info) + "' WHERE PlayerUUID = '" + uuid + "'")) {
                     updatePlayer.executeUpdate();
                 }
             }
@@ -72,61 +70,41 @@ public abstract class SQLStatements {
         }
     }
 
-    public void updateWinStreak(UUID uuid, boolean streakOver) {
-        try {
-            try(Connection connection = DataSource.getConnection()) {
-                if (streakOver) {
-                    try(PreparedStatement updatePlayer = connection.prepareStatement("UPDATE `" + this.mainTable + "` SET WinStreak = 0 WHERE PlayerUUID = '" + uuid + "'")) {
-                        updatePlayer.executeUpdate();
-                    }
-                } else {
-                    try(PreparedStatement updatePlayer = connection.prepareStatement("UPDATE `" + this.mainTable + "` SET WinStreak = WinStreak + 1 WHERE PlayerUUID = '" + uuid + "'")) {
-                        updatePlayer.executeUpdate();
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void updateBPTotal(UUID uuid, boolean purchase, int amount) {
-        try {
-            try(Connection connection = DataSource.getConnection()) {
-                if (purchase) {
-                    try(PreparedStatement updatePlayer = connection.prepareStatement("UPDATE `" + this.mainTable + "` SET BP_Balance = BP_Balance - " + amount + " WHERE PlayerUUID = '" + uuid + "'")) {
-                        updatePlayer.executeUpdate();
-                    }
-                } else {
-                    try(PreparedStatement updatePlayer = connection.prepareStatement("UPDATE `" + this.mainTable + "` SET BP_Balance = BP_Balance + " + amount + " WHERE PlayerUUID = '" + uuid + "'")) {
-                        updatePlayer.executeUpdate();
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public List<PlayerInfo> getPlayerData() {
+    public PlayerInfo getPlayerData(UUID uuid) {
         ArrayList<PlayerInfo> players = new ArrayList<>();
         try {
             try(Connection connection = DataSource.getConnection()) {
-                try(ResultSet results = connection.prepareStatement("SELECT * FROM `" + this.mainTable + "`").executeQuery()) {
-                    while(results.next()) {
-                        players.add(new PlayerInfo(UUID.fromString(results.getString("PlayerUUID")),results.getInt("TotalWins"),results.getInt("WinStreak"),results.getInt("BP_Balance"), 0));
-                    }
+                try(ResultSet results = connection.prepareStatement("SELECT * FROM `" + this.mainTable + "` WHERE PlayerUUID='" + uuid + "'").executeQuery()) {
+                    if (results.next()) return gson.fromJson(results.getString("Data"), PlayerInfo.class);
+
+                    return new PlayerInfo(uuid,0,0,0,0);
                 }
 
-                return players;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public List<PlayerInfo> getAllPlayerData() {
+        ArrayList<PlayerInfo> players = new ArrayList<>();
+
+        try {
+            try(Connection connection = DataSource.getConnection()) {
+                try(ResultSet results = connection.prepareStatement("SELECT * FROM `" + this.mainTable + "`").executeQuery()) {
+                    while (results.next()) players.add(gson.fromJson(results.getString("Data"), PlayerInfo.class));
+
+                    return players;
+                }
+
             }
         } catch (SQLException e) {
             e.printStackTrace();
             return players;
         }
+
     }
-
-
 
     public void addArena(Arenas data) {
         try {

@@ -70,7 +70,7 @@ public class MessageConfig {
             npcInteractYes = messages.getNode("npc","dialogue","interact","yes").getString("Lets battle!");
             npcInteractNo = messages.getNode("npc","dialogue","interact","no").getString("I changed my mind.");
             npcInteractQuestion = messages.getNode("npc","dialogue","interact","question-asked").getString("What would you like todo today?");
-            npcCost = messages.getNode("npc","dialogue","not-enough-money").getString("Oh my... it looks like your low on funds. The cost to enter the BT is {cost}");
+            npcCost = messages.getNode("npc","dialogue","not-enough-money").getString("Oh my... it looks like your low on funds. The cost to enter the BattleTower is ${cost}");
             npcAttempts = messages.getNode("npc","dialogue","max-attempts").getString("It seems you have reached your max attempts of {attempts} for the day. Come back tomorrow.");
 
             loader.save(main);

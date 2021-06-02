@@ -76,15 +76,13 @@ public class SharedIcons {
     }
 
     static Icon infoIcon(int slot, Player p) {
-        Optional<PlayerInfo> pl = BattleTower.getInstance().getSql().getPlayerData().stream().filter(id -> id.getPlayer().equals(p.getUniqueId())).findFirst();
+        PlayerInfo pl = BattleTower.getInstance().getSql().getPlayerData(p.getUniqueId());
 
         ArrayList<Text> itemLore = new ArrayList<>();
-        if(pl.isPresent()) {
-            itemLore.add(Text.of(Chat.embedColours("&bBattle Point Balance: &a" + pl.get().getBpTotal())));
-            itemLore.add(Text.of(Chat.embedColours("")));
-            itemLore.add(Text.of(Chat.embedColours("&bTotal Wins: &a" + pl.get().getTotalWins())));
-            itemLore.add(Text.of(Chat.embedColours("&bBest Win Streak: &a" + pl.get().getWinStreak())));
-        }
+        itemLore.add(Text.of(Chat.embedColours("&bBattle Point Balance: &a" + pl.getBpTotal())));
+        itemLore.add(Text.of(Chat.embedColours("")));
+        itemLore.add(Text.of(Chat.embedColours("&bTotal Wins: &a" + pl.getTotalWins())));
+        itemLore.add(Text.of(Chat.embedColours("&bBest Win Streak: &a" + pl.getWinStreak())));
 
         return new Icon(slot, ItemStack.builder()
                 .itemType(Sponge.getRegistry().getType(ItemType.class, "pixelmon:trade_panel").get()).quantity(1)
