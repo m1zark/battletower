@@ -34,4 +34,8 @@ public class Utils {
         Location<World> loc = new Location<>(player.getWorld(), location.getX(), location.getY(), location.getZ());
         player.setLocationAndRotation(loc, rotation);
     }
+
+    public static boolean between(int i, int minValueInclusive, int maxValueInclusive) {
+        return (i >= minValueInclusive && i <= maxValueInclusive);
+    }
 }

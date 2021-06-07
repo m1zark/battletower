@@ -21,10 +21,7 @@ import com.pixelmonmod.pixelmon.comm.packetHandlers.npc.StoreTrainerPokemon;
 import com.pixelmonmod.pixelmon.entities.npcs.EntityNPC;
 import com.pixelmonmod.pixelmon.entities.npcs.NPCTrainer;
 import com.pixelmonmod.pixelmon.entities.npcs.registry.NPCRegistryTrainers;
-import com.pixelmonmod.pixelmon.enums.EnumEncounterMode;
-import com.pixelmonmod.pixelmon.enums.EnumGrowth;
-import com.pixelmonmod.pixelmon.enums.EnumSpecies;
-import com.pixelmonmod.pixelmon.enums.EnumTrainerAI;
+import com.pixelmonmod.pixelmon.enums.*;
 import com.pixelmonmod.pixelmon.enums.battle.EnumBattleAIMode;
 import com.pixelmonmod.pixelmon.enums.battle.EnumBattleType;
 import com.pixelmonmod.pixelmon.enums.items.EnumPokeballs;
@@ -55,6 +52,14 @@ public class Trainers {
         trainer.setCustomSteveTexture(custom[1]);
         trainer.setTextureIndex(Integer.parseInt(custom[2]));
 
+        if(Config.canMega) {
+            trainer.setOldGenMode(EnumOldGenMode.Mega);
+            trainer.setMegaItem(EnumMegaItemsUnlocked.Mega);
+        } else if(Config.canDynamax) {
+            trainer.setOldGenMode(EnumOldGenMode.Dynamax);
+            trainer.setMegaItem(EnumMegaItemsUnlocked.Dynamax);
+        }
+
         trainer.setAlwaysRenderNameTag(true);
         trainer.setBattleAIMode(EnumBattleAIMode.Advanced);
         trainer.setEncounterMode(EnumEncounterMode.Once);
@@ -76,10 +81,10 @@ public class Trainers {
         trainer.updateLvl();
         trainer.battleRules = rules();
 
-        Pixelmon.network.sendTo(new ClearTrainerPokemon(), user);
-        for (int i = 0; i < trainer.getPokemonStorage().getTeam().size(); ++i) {
-            Pixelmon.network.sendTo(new StoreTrainerPokemon(trainer.getPokemonStorage().get(i)), user);
-        }
+        //Pixelmon.network.sendTo(new ClearTrainerPokemon(), user);
+        //for (int i = 0; i < trainer.getPokemonStorage().getTeam().size(); ++i) {
+            //Pixelmon.network.sendTo(new StoreTrainerPokemon(trainer.getPokemonStorage().get(i)), user);
+        //}
 
         return trainer;
     }

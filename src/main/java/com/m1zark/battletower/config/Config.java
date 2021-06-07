@@ -51,6 +51,8 @@ public class Config {
     public static boolean enhanced;
     public static int bossStreak;
     public static int trainerPokemon;
+    public static boolean canMega;
+    public static boolean canDynamax;
     public static List<String> clauses;
     public static List<String> pokemon;
     public static List<String> moves;
@@ -100,7 +102,7 @@ public class Config {
             settings.getNode("battles","rules","number-of-trainer-pokemon").getInt(6);
             settings.getNode("battles","rules","full-heal").getBoolean(true);
             settings.getNode("battles","rules","raise-to-level-cap").getBoolean(true);
-            settings.getNode("battles","rules","boss-trainer-streak").getInt(5);
+            settings.getNode("battles","rules","boss-trainer-streak").getInt(10);
             settings.getNode("battles","rules","show-teams").getBoolean(true);
             settings.getNode("battles","rules","level-cap").getInt(50);
             settings.getNode("battles","rules","clauses").getList(TypeToken.of(String.class), Lists.newArrayList("species","sleep","forfeit","item","bag","batonpass","endlessbattle","evasion","moody","ohko","swagger"));
@@ -110,6 +112,8 @@ public class Config {
 
             settings.getNode("trainers","custom-info").setComment("Custom appearance for trainers... [name]:[skin]:[4=skin,5=player]").getList(TypeToken.of(String.class), Lists.newArrayList("Florian:battlegirl:4","BattleTree Trainer:lass:4"));
             settings.getNode("trainers","trainer-prefix").getString("BattleTower Trainer");
+            settings.getNode("trainers","boss-Mega").getBoolean(true);
+            settings.getNode("trainers","boss-Dynamax").getBoolean(false);
 
             loader.save(main);
         } catch (ObjectMappingException | IOException e) {
@@ -163,6 +167,8 @@ public class Config {
             pokemon = main.getNode("Settings","battles","rules","banned-pokemon").getList(TypeToken.of(String.class)).stream().filter(EnumSpecies::hasPokemonAnyCase).collect(Collectors.toList());
             moves = main.getNode("Settings","battles","rules","banned-moves").getList(TypeToken.of(String.class)).stream().filter(Attack::hasAttack).collect(Collectors.toList());
             abilities = main.getNode("Settings","battles","rules","banned-abilities").getList(TypeToken.of(String.class)).stream().filter(ab -> AbilityBase.getAbility(ab).isPresent()).collect(Collectors.toList());
+            canMega = main.getNode("Settings","trainers","boss-Mega").getBoolean();
+            canDynamax = main.getNode("Settings","trainers","boss-Dynamax").getBoolean();
         } catch(ObjectMappingException e) {
             e.printStackTrace();
         }

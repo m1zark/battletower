@@ -1,9 +1,11 @@
 package com.m1zark.battletower.data;
 
+import com.m1zark.battletower.config.Config;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Date;
 import java.util.UUID;
 
 @Getter
@@ -15,6 +17,7 @@ public class PlayerInfo {
     private int winStreak;
     private int bpTotal;
     private int attempts;
+    private Date lastAttempt;
 
     public void setWinStreak(boolean streakOver) {
         if(streakOver) this.winStreak = 0;

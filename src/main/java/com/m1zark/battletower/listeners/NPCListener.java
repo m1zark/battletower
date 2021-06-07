@@ -58,8 +58,7 @@ public class NPCListener {
     private ArrayList<Dialogue> forgeDialogue(Player player, String name) {
         ArrayList<Dialogue> prompt = Lists.newArrayList();
         for(String text : MessageConfig.npcWelcome) {
-            prompt.add(Dialogue.builder().setName(name).setText(text.replace("{player}",player.getName())).build()
-            );
+            prompt.add(Dialogue.builder().setName(name).setText(text.replace("{player}",player.getName())).build());
         }
 
         PlayerInfo pl = BattleTower.getInstance().getSql().getPlayerData(player.getUniqueId());
@@ -74,7 +73,6 @@ public class NPCListener {
                                         .setText(MessageConfig.npcInteractYes)
                                         .setHandle(e -> {
                                                 e.setAction(DialogueNextAction.DialogueGuiAction.CLOSE);
-
                                                 if(checkTeam(player) && checkCanBattle(player, pl)) start(player);
                                         })
                                         .build()
@@ -131,7 +129,7 @@ public class NPCListener {
     private boolean checkCanBattle(Player p, PlayerInfo pl) {
         if(pl.getAttempts() <= Config.chances) {
             if (Money.canPay(p, Config.cost)) {
-                Money.withdrawn(p, Config.cost);
+                //Money.withdrawn(p, Config.cost);
                 return true;
             } else {
                 Chat.sendMessage(p, MessageConfig.npcCost.replace("{cost}", String.valueOf(Config.cost)));
@@ -164,9 +162,7 @@ public class NPCListener {
                 NPCTrainer trainer = Trainers.getTrainer(p, pl.getWinStreak() % Config.bossStreak == 0 && pl.getWinStreak() != 0);
                 Trainers.spawnTrainer(trainer, p);
 
-                Sponge.getScheduler().createTaskBuilder().execute(() -> {
-                    Trainers.startBattle((EntityPlayerMP) p, trainer);
-                }).delay(3, TimeUnit.SECONDS).submit(BattleTower.getInstance());
+                Sponge.getScheduler().createTaskBuilder().execute(() -> Trainers.startBattle((EntityPlayerMP) p, trainer)).delay(1, TimeUnit.SECONDS).submit(BattleTower.getInstance());
             }
         }
     }

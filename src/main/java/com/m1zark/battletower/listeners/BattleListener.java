@@ -25,6 +25,7 @@ import com.pixelmonmod.pixelmon.enums.battle.BattleResults;
 import com.pixelmonmod.pixelmon.enums.battle.EnumBattleEndCause;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import org.lwjgl.Sys;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 
@@ -45,10 +46,10 @@ public class BattleListener {
 
             int bp = Config.battlepoints;
             if(Config.allowMultiplier) {
-                if(between(pl.getWinStreak(),10,20)) bp = bp + 1;
-                else if(between(pl.getWinStreak(),20,30)) bp = bp + 2;
-                else if(between(pl.getWinStreak(),30,40)) bp = bp + 3;
-                else if(between(pl.getWinStreak(),40,50) || pl.getWinStreak() >= 51) bp = bp + 4;
+                if(Utils.between(pl.getWinStreak(),10,20)) bp = bp + 1;
+                else if(Utils.between(pl.getWinStreak(),20,30)) bp = bp + 2;
+                else if(Utils.between(pl.getWinStreak(),30,40)) bp = bp + 3;
+                else if(Utils.between(pl.getWinStreak(),40,50) || pl.getWinStreak() >= 51) bp = bp + 4;
             }
 
             pl.setTotalWins();
@@ -82,9 +83,13 @@ public class BattleListener {
                             .setHandle(e -> {
                                 e.reply(Dialogue.builder().setName(event.trainer.getName()).setText(MessageConfig.trainerDialogue().get(3)).build());
 
-                                Sponge.getScheduler().createTaskBuilder().execute(() -> {
+                                if(e.getAction().equals(DialogueNextAction.DialogueGuiAction.CLOSE)) {
                                     this.endBattle(event.player, pl);
-                                }).delay(2, TimeUnit.SECONDS).submit(BattleTower.getInstance());
+                                }
+
+                                //Sponge.getScheduler().createTaskBuilder().execute(() -> {
+                                    //this.endBattle(event.player, pl);
+                                //}).delay(2, TimeUnit.SECONDS).submit(BattleTower.getInstance());
                             })
                             .build())
                     .build());
@@ -103,12 +108,25 @@ public class BattleListener {
             pl.setWinStreak(true);
 
             ArrayList<Dialogue> dialogues = new ArrayList<>();
-            dialogues.add(Dialogue.builder().setName(event.trainer.getName()).setText(MessageConfig.getMessages("messages.battles.npc.on-trainer-defeat")).build());
+
+            dialogues.add(Dialogue.builder()
+                    .setName(event.trainer.getName())
+                    .setText(MessageConfig.getMessages("messages.battles.npc.on-trainer-defeat"))
+                    .addChoice(Choice.builder()
+                            .setText("Goodbye!")
+                            .setHandle(e -> {
+                                if(e.getAction().equals(DialogueNextAction.DialogueGuiAction.CLOSE)) {
+                                    //Dialogue.setPlayerDialogueData(event.player, dialogues, true);
+                                    this.endBattle(event.player, pl);
+                                }
+                            }).build())
+                    .build());
+
             Dialogue.setPlayerDialogueData(event.player, dialogues, true);
 
-            Sponge.getScheduler().createTaskBuilder().execute(() -> {
-                this.endBattle(event.player, pl);
-            }).delay(2, TimeUnit.SECONDS).submit(BattleTower.getInstance());
+            //Sponge.getScheduler().createTaskBuilder().execute(() -> {
+                //this.endBattle(event.player, pl);
+            //}).delay(2, TimeUnit.SECONDS).submit(BattleTower.getInstance());
         }
     }
 
@@ -130,29 +148,32 @@ public class BattleListener {
             if (!trainer.getEntityData().getString("BattleTower").equals(player.getUniqueID().toString())) {
                 Chat.sendMessage((Player)player, "&cYou cannot battle this trainer!");
                 event.setCanceled(true);
+            } else {
+                trainer.setBattleController(event.bc);
             }
         }
-    }
-
-    private static boolean between(int i, int minValueInclusive, int maxValueInclusive) {
-        return (i >= minValueInclusive && i <= maxValueInclusive);
     }
 
     private void startBattle(Player player, int streak) {
         NPCTrainer trainer = Trainers.getTrainer(player, streak % Config.bossStreak == 0);
         Trainers.spawnTrainer(trainer, player);
-        Sponge.getScheduler().createTaskBuilder().execute(() ->
-                Trainers.startBattle((EntityPlayerMP)player, trainer)
-        ).delay(2, TimeUnit.SECONDS).submit(BattleTower.getInstance());
+        Sponge.getScheduler().createTaskBuilder().execute(() -> Trainers.startBattle((EntityPlayerMP)player, trainer)).delay(1, TimeUnit.SECONDS).submit(BattleTower.getInstance());
     }
 
     private void endBattle(EntityPlayerMP player, PlayerInfo pl) {
+        System.out.println("Ending battle...");
+
         BattleControllerBase bc = BattleRegistry.getBattle(player);
         if (bc != null) {
             bc.endBattleWithoutXP();
             BattleRegistry.deRegisterBattle(bc);
+
+            System.out.println("Battle Controller was null");
+
         } else {
             Pixelmon.network.sendTo(new ExitBattle(), player);
+
+            System.out.println("Forcing the player out of battle");
         }
 
         BattleTower.getInstance().getSql().updatePlayerData(player.getUniqueID(), pl);

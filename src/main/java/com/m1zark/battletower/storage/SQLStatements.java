@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -47,7 +48,7 @@ public abstract class SQLStatements {
                     if(!results.next()) {
                         try(PreparedStatement statement = connection.prepareStatement("INSERT INTO `" + this.mainTable + "` (PlayerUUID, Data) VALUES (?, ?)")) {
                             statement.setString(1, uuid.toString());
-                            statement.setString(2, gson.toJson(new PlayerInfo(uuid,0,0,0,0)));
+                            statement.setString(2, gson.toJson(new PlayerInfo(uuid,0,0,0,0, new Date())));
                             statement.executeUpdate();
                         }
                     }
@@ -77,9 +78,8 @@ public abstract class SQLStatements {
                 try(ResultSet results = connection.prepareStatement("SELECT * FROM `" + this.mainTable + "` WHERE PlayerUUID='" + uuid + "'").executeQuery()) {
                     if (results.next()) return gson.fromJson(results.getString("Data"), PlayerInfo.class);
 
-                    return new PlayerInfo(uuid,0,0,0,0);
+                    return new PlayerInfo(uuid,0,0,0,0, new Date());
                 }
-
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -97,14 +97,14 @@ public abstract class SQLStatements {
 
                     return players;
                 }
-
             }
         } catch (SQLException e) {
             e.printStackTrace();
             return players;
         }
-
     }
+
+    
 
     public void addArena(Arenas data) {
         try {
