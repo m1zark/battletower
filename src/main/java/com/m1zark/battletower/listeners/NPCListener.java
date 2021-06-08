@@ -161,8 +161,7 @@ public class NPCListener {
 
                 NPCTrainer trainer = Trainers.getTrainer(p, pl.getWinStreak() % Config.bossStreak == 0 && pl.getWinStreak() != 0);
                 Trainers.spawnTrainer(trainer, p);
-
-                Sponge.getScheduler().createTaskBuilder().execute(() -> Trainers.startBattle((EntityPlayerMP) p, trainer)).delay(1, TimeUnit.SECONDS).submit(BattleTower.getInstance());
+                Trainers.startBattle((EntityPlayerMP) p, trainer);
             }
         }
     }

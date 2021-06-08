@@ -139,7 +139,7 @@ public class BattleListener {
     private void startBattle(Player player, int streak) {
         NPCTrainer trainer = Trainers.getTrainer(player, streak % Config.bossStreak == 0);
         Trainers.spawnTrainer(trainer, player);
-        Sponge.getScheduler().createTaskBuilder().execute(() -> Trainers.startBattle((EntityPlayerMP)player, trainer)).delay(1, TimeUnit.SECONDS).submit(BattleTower.getInstance());
+        Trainers.startBattle((EntityPlayerMP) player, trainer);
     }
 
     private void endBattle(EntityPlayerMP player, PlayerInfo pl) {
@@ -151,7 +151,6 @@ public class BattleListener {
             BattleRegistry.deRegisterBattle(bc);
 
             System.out.println("Battle Controller was null");
-
         } else {
             Pixelmon.network.sendTo(new ExitBattle(), player);
 
