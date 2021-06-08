@@ -143,18 +143,12 @@ public class BattleListener {
     }
 
     private void endBattle(EntityPlayerMP player, PlayerInfo pl) {
-        System.out.println("Ending battle...");
-
         BattleControllerBase bc = BattleRegistry.getBattle(player);
         if (bc != null) {
             bc.endBattleWithoutXP();
             BattleRegistry.deRegisterBattle(bc);
-
-            System.out.println("Battle Controller was null");
         } else {
             Pixelmon.network.sendTo(new ExitBattle(), player);
-
-            System.out.println("Forcing the player out of battle");
         }
 
         BattleTower.getInstance().getSql().updatePlayerData(player.getUniqueID(), pl);
