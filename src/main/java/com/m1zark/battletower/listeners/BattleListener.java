@@ -73,23 +73,14 @@ public class BattleListener {
                                     e.reply(Dialogue.builder().setName(event.trainer.getName()).setText(MessageConfig.trainerDialogue().get(1)).build());
                                 }
 
-                                if(e.getAction().equals(DialogueNextAction.DialogueGuiAction.CLOSE)) {
-                                    startBattle(p, pl.getWinStreak());
-                                }
+                                startBattle(p, pl.getWinStreak());
                             })
                             .build())
                     .addChoice(Choice.builder()
                             .setText(MessageConfig.trainerDialogue().get(2))
                             .setHandle(e -> {
                                 e.reply(Dialogue.builder().setName(event.trainer.getName()).setText(MessageConfig.trainerDialogue().get(3)).build());
-
-                                if(e.getAction().equals(DialogueNextAction.DialogueGuiAction.CLOSE)) {
-                                    this.endBattle(event.player, pl);
-                                }
-
-                                //Sponge.getScheduler().createTaskBuilder().execute(() -> {
-                                    //this.endBattle(event.player, pl);
-                                //}).delay(2, TimeUnit.SECONDS).submit(BattleTower.getInstance());
+                                this.endBattle(event.player, pl);
                             })
                             .build())
                     .build());
@@ -100,7 +91,7 @@ public class BattleListener {
 
     @SubscribeEvent
     public void onTrainerWon(LostToTrainerEvent event) {
-        if(event.trainer.getEntityData().hasKey("BattleTower")) {
+        if(event.trainer.getEntityData().hasKey("BattleTower") && event.trainer.getEntityData().getString("BattleTower").equals(event.player.getUniqueID().toString())) {
             Player p = (Player) event.player;
             PlayerInfo pl = BattleTower.getInstance().getSql().getPlayerData(p.getUniqueId());
 
@@ -114,19 +105,10 @@ public class BattleListener {
                     .setText(MessageConfig.getMessages("messages.battles.npc.on-trainer-defeat"))
                     .addChoice(Choice.builder()
                             .setText("Goodbye!")
-                            .setHandle(e -> {
-                                if(e.getAction().equals(DialogueNextAction.DialogueGuiAction.CLOSE)) {
-                                    //Dialogue.setPlayerDialogueData(event.player, dialogues, true);
-                                    this.endBattle(event.player, pl);
-                                }
-                            }).build())
+                            .setHandle(e -> this.endBattle(event.player, pl)).build())
                     .build());
 
             Dialogue.setPlayerDialogueData(event.player, dialogues, true);
-
-            //Sponge.getScheduler().createTaskBuilder().execute(() -> {
-                //this.endBattle(event.player, pl);
-            //}).delay(2, TimeUnit.SECONDS).submit(BattleTower.getInstance());
         }
     }
 

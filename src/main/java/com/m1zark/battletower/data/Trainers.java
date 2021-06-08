@@ -9,6 +9,7 @@ import com.pixelmonmod.pixelmon.api.exceptions.ShowdownImportException;
 import com.pixelmonmod.pixelmon.api.pokemon.ImportExportConverter;
 import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
 import com.pixelmonmod.pixelmon.battles.BattleRegistry;
+import com.pixelmonmod.pixelmon.battles.controller.BattleControllerBase;
 import com.pixelmonmod.pixelmon.battles.controller.participants.BattleParticipant;
 import com.pixelmonmod.pixelmon.battles.controller.participants.PlayerParticipant;
 import com.pixelmonmod.pixelmon.battles.controller.participants.TrainerParticipant;
@@ -48,7 +49,7 @@ public class Trainers {
         trainer.init(NPCRegistryTrainers.Steve);
         String[] custom = Config.trainerInfo("custom-info");
         trainer.getEntityData().setString("BattleTower", p.getUniqueId().toString());
-        trainer.setName(Config.trainer_prefix + custom[0]);
+        trainer.setName(Config.trainer_prefix  + " " + custom[0]);
         trainer.setCustomSteveTexture(custom[1]);
         trainer.setTextureIndex(Integer.parseInt(custom[2]));
 
@@ -80,11 +81,6 @@ public class Trainers {
 
         trainer.updateLvl();
         trainer.battleRules = rules();
-
-        //Pixelmon.network.sendTo(new ClearTrainerPokemon(), user);
-        //for (int i = 0; i < trainer.getPokemonStorage().getTeam().size(); ++i) {
-            //Pixelmon.network.sendTo(new StoreTrainerPokemon(trainer.getPokemonStorage().get(i)), user);
-        //}
 
         return trainer;
     }
