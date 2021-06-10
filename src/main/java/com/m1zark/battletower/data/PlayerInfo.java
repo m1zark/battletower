@@ -37,4 +37,8 @@ public class PlayerInfo {
     public void setTotalWins() {
         this.totalWins++;
     }
+
+    public void setLastAttempt(Date newDate) {
+        this.lastAttempt = newDate;
+    }
 }

@@ -59,10 +59,11 @@ public class BT implements CommandExecutor {
             if(action.isPresent()) {
                 switch (action.get()) {
                     case "set":
-                        if(Config.setEntranceLocation(((Player) src).getPosition())) Chat.sendMessage(src, "&7BT entrance has been set at &a" + ((Player) src).getPosition() + "&7.");
+                        if(Config.setEntranceLocation(((Player) src).getPosition()) && Config.setEntranceRotation(((Player) src).getHeadRotation())) Chat.sendMessage(src, "&7BT entrance has been set at &a" + ((Player) src).getPosition() + "&7.");
                         break;
                     case "delete":
                         Config.setEntranceLocation(null);
+                        Config.setEntranceRotation(null);
                         Chat.sendMessage(src, "&7Location set for BT entrance has been deleted.");
                         break;
                 }
@@ -93,9 +94,10 @@ public class BT implements CommandExecutor {
                 arena.setInUse(false);
                 BattleTower.getInstance().getSql().updateArena(arena);
             });
+
             BattleTower.getInstance().battleArenas.clear();
 
-            Chat.sendMessage(src, "&7" + arenas.size() + " arenas reset.");
+            Chat.sendMessage(src, "&7" + arenas.size() + " arenas unlocked.");
 
             return CommandResult.success();
         }
