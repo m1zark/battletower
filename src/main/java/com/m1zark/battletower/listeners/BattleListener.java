@@ -58,12 +58,10 @@ public class BattleListener {
 
             BattleTower.getInstance().getSql().updatePlayerData(p.getUniqueId(), pl);
 
-            //ArrayList<Dialogue> dialogues = new ArrayList<>();
-            //dialogues.add(Dialogue.builder().setName(event.trainer.getName()).setText(MessageConfig.getMessages("messages.battles.npc.on-trainer-win").replace("{amount}",String.valueOf(bp))).build());
+            ArrayList<Dialogue> dialogues = new ArrayList<>();
+            dialogues.add(Dialogue.builder().setName(event.trainer.getName()).setText(MessageConfig.getMessages("messages.battles.npc.on-trainer-win").replace("{amount}",String.valueOf(bp))).build());
 
-            startBattle(p, pl.getWinStreak());
 
-            /*
             dialogues.add(Dialogue.builder()
                     .setName(event.trainer.getName())
                     .setText(MessageConfig.getMessages("messages.battles.npc.dialogue"))
@@ -76,20 +74,21 @@ public class BattleListener {
                                     e.reply(Dialogue.builder().setName(event.trainer.getName()).setText(MessageConfig.trainerDialogue().get(1)).build());
                                 }
 
+                                e.setAction(DialogueNextAction.DialogueGuiAction.CLOSE);
                                 startBattle(p, pl.getWinStreak());
                             })
                             .build())
                     .addChoice(Choice.builder()
                             .setText(MessageConfig.trainerDialogue().get(2))
                             .setHandle(e -> {
-                                e.reply(Dialogue.builder().setName(event.trainer.getName()).setText(MessageConfig.trainerDialogue().get(3)).build());
+                                //e.reply(Dialogue.builder().setName(event.trainer.getName()).setText(MessageConfig.trainerDialogue().get(3)).build());
+                                e.setAction(DialogueNextAction.DialogueGuiAction.CLOSE);
                                 this.endBattle(event.player, pl);
                             })
                             .build())
                     .build());
 
             Dialogue.setPlayerDialogueData(event.player, dialogues, true);
-            */
         }
     }
 
@@ -102,21 +101,20 @@ public class BattleListener {
             event.trainer.setDead();
             pl.setWinStreak(true);
 
-            this.endBattle(event.player, pl);
-
-            /*
             ArrayList<Dialogue> dialogues = new ArrayList<>();
-
             dialogues.add(Dialogue.builder()
                     .setName(event.trainer.getName())
                     .setText(MessageConfig.getMessages("messages.battles.npc.on-trainer-defeat"))
                     .addChoice(Choice.builder()
                             .setText("Goodbye!")
-                            .setHandle(e -> this.endBattle(event.player, pl)).build())
+                            .setHandle(e -> {
+                                e.setAction(DialogueNextAction.DialogueGuiAction.CLOSE);
+                                this.endBattle(event.player, pl);
+                            })
+                            .build())
                     .build());
 
             Dialogue.setPlayerDialogueData(event.player, dialogues, true);
-            */
         }
     }
 
@@ -152,18 +150,14 @@ public class BattleListener {
     }
 
     private void endBattle(EntityPlayerMP player, PlayerInfo pl) {
-        System.out.println("Ending BT battle and clearing arenas.");
+        System.out.println("Ending battle!");
 
         BattleControllerBase bc = BattleRegistry.getBattle(player);
         if (bc != null) {
             bc.endBattleWithoutXP();
             BattleRegistry.deRegisterBattle(bc);
-
-            System.out.println("De-registering battle controller.");
         } else {
             Pixelmon.network.sendTo(new ExitBattle(), player);
-
-            System.out.println("Forcing battle controller to end.");
         }
 
         BattleTower.getInstance().getSql().updatePlayerData(player.getUniqueID(), pl);
@@ -173,7 +167,7 @@ public class BattleListener {
         BattleTower.getInstance().getSql().updateArena(arena);
         BattleTower.getInstance().battleArenas.remove(player.getUniqueID());
 
-        if(Config.getEntranceLocation() != null && bc == null) {
+        if(Config.getEntranceLocation() != null) {
             Utils.teleportPlayer((Player) player,Config.getEntranceLocation(),Config.getEntranceRotation());
             Chat.sendMessage((Player) player, MessageConfig.getMessages("messages.battles.teleporting-to-entrance"));
         }
