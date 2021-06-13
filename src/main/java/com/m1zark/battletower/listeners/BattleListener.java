@@ -40,6 +40,7 @@ public class BattleListener {
         Player p = (Player) event.player;
 
         if(event.trainer.getEntityData().hasKey("BattleTower")) {
+            event.trainer.battleController.endBattle();
             event.trainer.setDead();
 
             PlayerInfo pl = BattleTower.getInstance().getSql().getPlayerData(p.getUniqueId());
@@ -61,7 +62,6 @@ public class BattleListener {
             ArrayList<Dialogue> dialogues = new ArrayList<>();
             dialogues.add(Dialogue.builder().setName(event.trainer.getName()).setText(MessageConfig.getMessages("messages.battles.npc.on-trainer-win").replace("{amount}",String.valueOf(bp))).build());
 
-
             dialogues.add(Dialogue.builder()
                     .setName(event.trainer.getName())
                     .setText(MessageConfig.getMessages("messages.battles.npc.dialogue"))
@@ -81,7 +81,7 @@ public class BattleListener {
                     .addChoice(Choice.builder()
                             .setText(MessageConfig.trainerDialogue().get(2))
                             .setHandle(e -> {
-                                //e.reply(Dialogue.builder().setName(event.trainer.getName()).setText(MessageConfig.trainerDialogue().get(3)).build());
+                                e.reply(Dialogue.builder().setName(event.trainer.getName()).setText(MessageConfig.trainerDialogue().get(3)).build());
                                 e.setAction(DialogueNextAction.DialogueGuiAction.CLOSE);
                                 this.endBattle(event.player, pl);
                             })
@@ -98,7 +98,9 @@ public class BattleListener {
             Player p = (Player) event.player;
             PlayerInfo pl = BattleTower.getInstance().getSql().getPlayerData(p.getUniqueId());
 
+            event.trainer.battleController.endBattle();
             event.trainer.setDead();
+
             pl.setWinStreak(true);
 
             ArrayList<Dialogue> dialogues = new ArrayList<>();
