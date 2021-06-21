@@ -139,7 +139,6 @@ public class BattleListener {
                 Chat.sendMessage((Player)player, "&cYou cannot battle this trainer!");
                 event.setCanceled(true);
             } else {
-                System.out.println("Trainer battle controller set!");
                 trainer.setBattleController(event.bc);
             }
         }
